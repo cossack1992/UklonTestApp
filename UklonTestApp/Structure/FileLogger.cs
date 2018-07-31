@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace UklonTestApp.Structure
@@ -11,7 +12,7 @@ namespace UklonTestApp.Structure
     public class FileLogger : ILogger
     {
         private string filePath;
-        private object _lock = new object();
+        static ReaderWriterLock rwl = new ReaderWriterLock();
         public FileLogger(string path)
         {
             filePath = path;
@@ -23,29 +24,38 @@ namespace UklonTestApp.Structure
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            //return logLevel == LogLevel.Trace;
             return true;
         }
 
         private void Log<TState>(DateTimeOffset timestamp, LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            if (formatter != null)
-            {
-                var builder = new StringBuilder();
-                builder.Append(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff zzz"));
-                builder.Append(" [");
-                builder.Append(logLevel.ToString());
-                builder.Append("] ");
-                builder.Append(": ");
-                builder.AppendLine(formatter(state, exception));
+            
+                if (formatter != null)
+                {
+                    var builder = new StringBuilder();
+                    builder.Append(timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff zzz"));
+                    builder.Append(" [");
+                    builder.Append(logLevel.ToString());
+                    builder.Append("] ");
+                    builder.Append(": ");
+                    builder.AppendLine(formatter(state, exception));
 
-                File.AppendAllText(filePath, builder.ToString());
-            }
+                    File.AppendAllText(filePath, builder.ToString());
+                }
+            
         }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            Log(DateTimeOffset.Now, logLevel, eventId, state, exception, formatter);
+            try
+            {
+                rwl.AcquireWriterLock(100);
+                Log(DateTimeOffset.Now, logLevel, eventId, state, exception, formatter);
+            }
+            finally
+            {
+                rwl.ReleaseWriterLock();
+            }
         }
     }
 }

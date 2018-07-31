@@ -26,6 +26,7 @@ namespace UklonTestApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(new LoggerFactory().AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger.txt")));
+            services.AddLogging();
             services.AddMvc();
         }
 
@@ -48,7 +49,7 @@ namespace UklonTestApp
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{regionCode?}");
             });
         }
     }
