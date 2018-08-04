@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using UklonTestApp.Helpers;
 using UklonTestApp.Models;
+using UklonTestApp.Structure;
+using UklonTestApp.Structure.Service;
 
 namespace UklonTestApp.Controllers
 {
@@ -19,37 +21,50 @@ namespace UklonTestApp.Controllers
     /// </summary>
     public class HomeController : Controller
     {
+        public IService Service { get; }
+
+        public HomeController(IService service)
+        {
+            Service = service;
+        }
+
         public IActionResult Index()
         {
-            throw new Exception();
+            return View();
         }
 
         /// <summary>
-        /// Get json collection of all available <see cref="Region"/>s.
+        /// Get json collection of all available <see cref="RegionModel"/>s.
         /// </summary>
-        /// <returns>Json collection <see cref="Region"/>s.</returns>
-        public JsonResult GetRegions()
+        /// <returns>Json collection <see cref="RegionModel"/>s.</returns>
+        public async Task<JsonResult> GetRegions()
         {
-            string url = @"https://goo.gl/EKCY6i";
-            var htmlWeb = new HtmlWeb();
-            var document = htmlWeb.Load(url);
-
-            List<Region> regions = HelperMethods.GetRegionsFromHTMLDocument(document);
-
-            return Json(JsonConvert.SerializeObject(regions));
+            var results = await Service.GetRegions();
+            return Json(JsonConvert.SerializeObject(results));
         }
 
         /// <summary>
-        /// Get traffic status of <see cref="Region"/> by regionCode.
+        /// Get traffic status of <see cref="RegionModel"/> by regionCode.
         /// </summary>
-        /// <param name="regionCode">The identifier of <see cref="Region"/>.</param>
-        /// <returns>Json traffic status for <see cref="Region"/>.</returns>
-        public JsonResult GetRegion(int regionCode)
-        {            
-            string level, icon, text;
-            HelperMethods.GetRegionTrafficStatusByRegionCode(regionCode, out level, out icon, out text);
+        /// <param name="regionCode">The identifier of <see cref="RegionModel"/>.</param>
+        /// <returns>Json traffic status for <see cref="RegionModel"/>.</returns>
+        public async Task<JsonResult> GetRegion(string regionCode)
+        {
+            var results = await Service.GetRegionTrafficStatusAsync(regionCode, DateTimeOffset.Now);
+            return Json(JsonConvert.SerializeObject(results));
+        }
 
-            return Json(JsonConvert.SerializeObject(new { Level = level, Icon = icon, Text = text }));
+        /// <summary>
+        /// Get traffic status of <see cref="RegionModel"/> by regionCode.
+        /// </summary>
+        /// <param name="regionCode">The identifier of <see cref="RegionModel"/>.</param>
+        /// <returns>Json traffic status for <see cref="RegionModel"/>.</returns>
+        public async Task<JsonResult> GetRegionStatuses()
+        {
+            var regions = await Service.GetRegions();
+
+            var statuses = await Service.GetRegionTrafficStatuses(regions.Select(region => region.RegionCode), DateTimeOffset.Now);
+            return Json(JsonConvert.SerializeObject(statuses));
         }
 
         /// <summary>

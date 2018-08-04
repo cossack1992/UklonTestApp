@@ -12,6 +12,11 @@ namespace UklonTestApp.Exensions
         public static ILoggerFactory AddFile(this ILoggerFactory factory,
                                         string filePath)
         {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("Argument is not valid!", nameof(filePath));
+            }
+
             factory.AddProvider(new FileLoggerProvider(filePath));
             return factory;
         }
