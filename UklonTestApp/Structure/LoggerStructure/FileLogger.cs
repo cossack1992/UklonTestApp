@@ -1,11 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace UklonTestApp.Structure
 {
@@ -49,7 +46,7 @@ namespace UklonTestApp.Structure
         {
             try
             {
-                rwl.AcquireWriterLock(100);
+                rwl.AcquireWriterLock(500);
                 Log(DateTimeOffset.Now, logLevel, eventId, state, exception, formatter);
             }
             finally

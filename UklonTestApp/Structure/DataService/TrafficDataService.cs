@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UklonTestApp.Models;
-using UklonTestApp.Structure.DataService.DataService;
-using UklonTestApp.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using UklonTestApp.Structure.TrafficStructure.Services;
 
 namespace UklonTestApp.Structure.DataService
 {
@@ -14,12 +13,12 @@ namespace UklonTestApp.Structure.DataService
     /// </summary>
     public class TrafficDataService : ITrafficDataService
     {
-        public TrafficDataService(DatabaseContext databaseContext)
+        public TrafficDataService(ITrafficDataServiceProvider trafficDataServiceProvider)
         {
-            DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
+            TrafficDataServiceProvider = trafficDataServiceProvider ?? throw new ArgumentNullException(nameof(trafficDataServiceProvider));
         }
 
-        public DatabaseContext DatabaseContext { get; }
+        public ITrafficDataServiceProvider TrafficDataServiceProvider { get; }
 
         public async Task<RegionTrafficStatusModel> AddRegionTrafficStatusAsync(RegionTrafficStatus result)
         {
@@ -28,7 +27,7 @@ namespace UklonTestApp.Structure.DataService
                 throw new ArgumentNullException(nameof(result));
             }
 
-            using (var context = new DatabaseContext())
+            using (var context = this.TrafficDataServiceProvider.GetDataService())
             {
                 var regionToUpdate = context.Regions.FirstOrDefault(region => region.RegionCode == result.RegionCode);
 
@@ -66,7 +65,7 @@ namespace UklonTestApp.Structure.DataService
                 throw new ArgumentNullException(nameof(regions));
             }
 
-            using (var context = new DatabaseContext())
+            using (var context = this.TrafficDataServiceProvider.GetDataService())
             {
                 var regionModels = new List<RegionModel>();
                 foreach (var region in regions)
@@ -106,7 +105,7 @@ namespace UklonTestApp.Structure.DataService
                 throw new ArgumentException("Argument is not valid!", nameof(regionCode));
             }
 
-            using (var context = new DatabaseContext())
+            using (var context = this.TrafficDataServiceProvider.GetDataService())
             {
                 return context.RegionTrafficStatuses
                     .Include(status => status.Region)

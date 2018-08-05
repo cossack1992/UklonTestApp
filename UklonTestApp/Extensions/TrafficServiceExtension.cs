@@ -41,7 +41,7 @@ namespace UklonTestApp.Exensions
                     throw new ConfigurationException($"Provided service [ServiceName = {serviceName}] is not ITrafficSevice");
                 }
 
-                return serviceCollection.AddSingleton(serviceInstance);
+                return serviceCollection.AddTransient(_ => serviceInstance);
             }
             catch(Exception exception)
             {

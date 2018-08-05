@@ -23,6 +23,10 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
 
         public HttpClient Client { get; }
 
+        /// <summary>
+        /// Get all available <see cref="Region"/>
+        /// </summary>
+        /// <returns></returns>
         public Task<IEnumerable<Region>> GetRegionsAsync()
         {
             try
@@ -38,7 +42,7 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
             }
             catch (Exception exception)
             {
-                throw new TrafficException("Could not read results of request to 'https://goo.gl/EKCY6i'", exception);
+                throw new TrafficServiceException("Could not read results of request to 'https://goo.gl/EKCY6i'", exception);
             }
         }
 
@@ -89,7 +93,7 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
             }
             catch (Exception exception)
             {
-                throw new TrafficException("Could not read results of request to yandex", exception);
+                throw new TrafficServiceException("Could not read results of request to yandex", exception);
             }
         }
     }

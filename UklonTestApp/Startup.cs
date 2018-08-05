@@ -1,10 +1,8 @@
-﻿
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System.IO;
 using UklonTestApp.Exensions;
 using UklonTestApp.Structure.DataService;
 using UklonTestApp.Structure.DataService.DataService;
@@ -18,29 +16,27 @@ namespace UklonTestApp
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-
-            using (var client = new DatabaseContext())
-            {
-                client.Database.EnsureCreated();
-            }
         }
 
         public IConfiguration Configuration { get; }
-        public ILoggerFactory LoggerFactory { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
             services.AddMvc();
-            services.AddEntityFrameworkSqlite().AddDbContext<DatabaseContext>();
-            services.AddSingleton(new LoggerFactory().AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger.txt")));
+
+            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+
+            services.AddEntityFrameworkSqlite().AddDbContext<DatabaseContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Transient);
+            services.AddLogging();
+            //services.AddSingleton(new LoggerFactory().AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger.txt")));
 
             services.AddTrafficService(Configuration);
-            services.AddSingleton<DatabaseContext>();
-            services.AddSingleton<ITrafficProvider, TrafficStatusProvider>();
-            services.AddSingleton<ITrafficDataService, TrafficDataService>();
-            services.AddSingleton<IService, ServiceAgent>();
+
+            services.AddTransient<ITrafficDataService, TrafficDataService>();
+            services.AddTransient<ITrafficDataServiceProvider, TrafficDataServiceProvider>();
+            services.AddTransient<IService, ServiceAgent>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

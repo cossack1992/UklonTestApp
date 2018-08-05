@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Xml;
-using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using UklonTestApp.Helpers;
 using UklonTestApp.Models;
-using UklonTestApp.Structure;
 using UklonTestApp.Structure.Service;
 
 namespace UklonTestApp.Controllers

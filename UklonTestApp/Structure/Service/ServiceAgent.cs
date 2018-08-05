@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UklonTestApp.Models;
 using UklonTestApp.Structure.DataService;
-using UklonTestApp.Structure.TrafficStructure.Services;
 using UklonTestApp.Exceptions;
 using UklonTestApp.Structure.TrafficStructure.Interfaces;
 
