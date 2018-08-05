@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace UklonTestApp.Models
 {
+    [Serializable]
     public class RegionTrafficStatus
     {
         public RegionTrafficStatus(
@@ -15,6 +16,31 @@ namespace UklonTestApp.Models
             string icon,
             string text)
         {
+            if (string.IsNullOrWhiteSpace(regionCode))
+            {
+                throw new ArgumentException("Aargument is invalid", nameof(regionCode));
+            }
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                throw new ArgumentException("Aargument is invalid", nameof(title));
+            }
+
+            if (string.IsNullOrWhiteSpace(level))
+            {
+                throw new ArgumentException("Aargument is invalid", nameof(level));
+            }
+
+            if (string.IsNullOrWhiteSpace(icon))
+            {
+                throw new ArgumentException("Aargument is invalid", nameof(icon));
+            }
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                throw new ArgumentException("Aargument is invalid", nameof(text));
+            }
+
             RegionCode = regionCode;
             Title = title;
             Time = time;

@@ -5,18 +5,19 @@ using System.Threading.Tasks;
 
 namespace UklonTestApp.Models
 {
+    [Serializable]
     public class Region
     {
         public Region(string regionCode, string regionName)
         {
             if (string.IsNullOrWhiteSpace(regionCode))
             {
-                throw new ArgumentException("Argument is not valid", nameof(regionCode));
+                throw new ArgumentException("Argument is invalid", nameof(regionCode));
             }
 
             if (string.IsNullOrWhiteSpace(regionName))
             {
-                throw new ArgumentException("Argument is not valid", nameof(regionName));
+                throw new ArgumentException("Argument is invalid", nameof(regionName));
             }
 
             RegionCode = regionCode;

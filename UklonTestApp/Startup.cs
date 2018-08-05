@@ -38,7 +38,7 @@ namespace UklonTestApp
 
             services.AddTrafficService(Configuration);
             services.AddSingleton<DatabaseContext>();
-            services.AddSingleton<ITrafficStatusProvider, TrafficStatusProvider>();
+            services.AddSingleton<ITrafficProvider, TrafficStatusProvider>();
             services.AddSingleton<ITrafficDataService, TrafficDataService>();
             services.AddSingleton<IService, ServiceAgent>();
         }

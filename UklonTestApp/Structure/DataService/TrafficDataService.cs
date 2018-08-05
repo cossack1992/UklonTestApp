@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace UklonTestApp.Structure.DataService
 {
+    /// <summary>
+    /// Service to provide data service functionality
+    /// </summary>
     public class TrafficDataService : ITrafficDataService
     {
         public TrafficDataService(DatabaseContext databaseContext)
@@ -18,7 +21,7 @@ namespace UklonTestApp.Structure.DataService
 
         public DatabaseContext DatabaseContext { get; }
 
-        public async Task<RegionTrafficStatusModel> AddOrUpdateRegionTrafficStatusAsync(RegionTrafficStatus result)
+        public async Task<RegionTrafficStatusModel> AddRegionTrafficStatusAsync(RegionTrafficStatus result)
         {
             if (result == null)
             {
@@ -56,7 +59,7 @@ namespace UklonTestApp.Structure.DataService
             }
         }
 
-        public async Task<IEnumerable<RegionModel>> SaveRegions(IEnumerable<Region> regions)
+        public async Task<IEnumerable<RegionModel>> AddRegionsAsync(IEnumerable<Region> regions)
         {
             if (regions == null)
             {

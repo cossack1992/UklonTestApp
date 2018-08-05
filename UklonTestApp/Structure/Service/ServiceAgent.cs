@@ -1,43 +1,39 @@
-﻿using HtmlAgilityPack;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UklonTestApp.Helpers;
 using UklonTestApp.Models;
 using UklonTestApp.Structure.DataService;
 using UklonTestApp.Structure.TrafficStructure.Services;
 using UklonTestApp.Exceptions;
-using System.Threading;
 
 namespace UklonTestApp.Structure.Service
 {
+    /// <summary>
+    /// Traffic service. 
+    /// </summary>
     public class ServiceAgent : IService
     {
-        public ServiceAgent(ITrafficStatusProvider trafficStatusProvider, ITrafficDataService trafficDataService)
+        public ServiceAgent(ITrafficProvider trafficStatusProvider, ITrafficDataService trafficDataService)
         {
-            TrafficStatusProvider = trafficStatusProvider ?? throw new ArgumentNullException(nameof(trafficStatusProvider));
+            TrafficProvider = trafficStatusProvider ?? throw new ArgumentNullException(nameof(trafficStatusProvider));
             TrafficDataService = trafficDataService ?? throw new ArgumentNullException(nameof(trafficDataService));
         }
 
-        public ITrafficStatusProvider TrafficStatusProvider { get; }
+        public ITrafficProvider TrafficProvider { get; }
         public ITrafficDataService TrafficDataService { get; }
 
+        /// <summary>
+        /// Get all available regions!
+        /// </summary>
+        /// <returns>List of <see cref="Region"/>s</returns>
         public async Task<IEnumerable<Region>> GetRegions()
         {
             try
             {
-                var regions = await Task.Run(
-                    () =>
-                    {
-                        string url = @"https://goo.gl/EKCY6i";
-                        var htmlWeb = new HtmlWeb();
-                        var document = htmlWeb.Load(url);
+                var regions = await this.TrafficProvider.GetRegionsAsync();            
 
-                        return HelperMethods.GetRegionsFromHTMLDocument(document);
-                    }
-                    );
-                var regionModels = await this.TrafficDataService.SaveRegions(regions);
+                var regionModels = await this.TrafficDataService.AddRegionsAsync(regions);
 
                 return regionModels.Select(
                     model => 
@@ -52,6 +48,12 @@ namespace UklonTestApp.Structure.Service
 
         }
 
+        /// <summary>
+        /// Get region traffic stratus for <paramref name="regionCode"/> and <paramref name="dateTimeNow"/>
+        /// </summary>
+        /// <param name="regionCode">Region code.</param>
+        /// <param name="dateTimeNow">Timestamp for status.</param>
+        /// <returns><see cref="Task<RegionTrafficStatus>"/></returns>
         public async Task<RegionTrafficStatus> GetRegionTrafficStatusAsync(string regionCode, DateTimeOffset dateTimeNow)
         {
             if (string.IsNullOrWhiteSpace(regionCode))
@@ -65,11 +67,11 @@ namespace UklonTestApp.Structure.Service
 
                 if (result == null)
                 {
-                    var webResult = await this.TrafficStatusProvider.GetRegionTrafficStatusAsync(regionCode, dateTimeNow);
+                    var webResult = await this.TrafficProvider.GetRegionTrafficStatusAsync(regionCode, dateTimeNow);
 
                     if(webResult != null)
                     {
-                        result = await this.TrafficDataService.AddOrUpdateRegionTrafficStatusAsync(webResult);
+                        result = await this.TrafficDataService.AddRegionTrafficStatusAsync(webResult);
                     }
                 }
 
@@ -88,6 +90,12 @@ namespace UklonTestApp.Structure.Service
             }
         }
 
+        /// <summary>
+        /// Get <see cref="RegionTrafficStatus"/> for provided region codes!
+        /// </summary>
+        /// <param name="regionCodes">List of region codes to retrive.</param>
+        /// <param name="dateTimeNow">Timestamp for statuses.</param>
+        /// <returns><see cref="Task<RegionTrafficStatus[]>"/></returns>
         public async Task<RegionTrafficStatus[]> GetRegionTrafficStatuses(IEnumerable<string> regionCodes, DateTimeOffset dateTimeNow)
         {
             if (regionCodes == null)

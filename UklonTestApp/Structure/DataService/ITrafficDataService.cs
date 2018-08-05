@@ -9,7 +9,7 @@ namespace UklonTestApp.Structure.DataService
     public interface ITrafficDataService
     {
         RegionTrafficStatusModel GetRegionTrafficStatusAsync(string regionId, DateTimeOffset dateTimeNow);
-        Task<RegionTrafficStatusModel> AddOrUpdateRegionTrafficStatusAsync(RegionTrafficStatus result);
-        Task<IEnumerable<RegionModel>> SaveRegions(IEnumerable<Region> regions);
+        Task<RegionTrafficStatusModel> AddRegionTrafficStatusAsync(RegionTrafficStatus result);
+        Task<IEnumerable<RegionModel>> AddRegionsAsync(IEnumerable<Region> regions);
     }
 }

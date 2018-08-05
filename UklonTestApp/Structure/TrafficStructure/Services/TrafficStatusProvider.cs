@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UklonTestApp.Models;
 using UklonTestApp.Structure.TrafficStructure.Interfaces;
 
 namespace UklonTestApp.Structure.TrafficStructure.Services
 {
-    public class TrafficStatusProvider : ITrafficStatusProvider
+    /// <summary>
+    /// Provide <see cref="RegionTrafficStatus"/> 
+    /// </summary>
+    public class TrafficStatusProvider : ITrafficProvider
     {
         public TrafficStatusProvider(ITrafficSevice trafficService)
         {
@@ -16,6 +18,17 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
 
         public ITrafficSevice TrafficService { get; }
 
+        public Task<IEnumerable<Region>> GetRegionsAsync()
+        {
+            return Task.Run(() => this.TrafficService.GetRegions());
+        }
+
+        /// <summary>
+        /// Get region traffic stratus for <paramref name="regionCode"/> and <paramref name="dateTimeNow"/>
+        /// </summary>
+        /// <param name="regionCode">Region code.</param>
+        /// <param name="dateTimeNow">Timestamp for status.</param>
+        /// <returns><see cref="RegionTrafficStatus"/></returns>
         public Task<RegionTrafficStatus> GetRegionTrafficStatusAsync(string regionCode, DateTimeOffset dateTimeNow)
         {
             if (string.IsNullOrWhiteSpace(regionCode))
