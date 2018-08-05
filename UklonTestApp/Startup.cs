@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using UklonTestApp.Exensions;
+using UklonTestApp.Structure.DataService;
+using UklonTestApp.Structure.DataService.DataService;
+using UklonTestApp.Structure.Service;
+using UklonTestApp.Structure.TrafficStructure.Services;
 
 namespace UklonTestApp
 {
@@ -21,7 +23,20 @@ namespace UklonTestApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLogging();
             services.AddMvc();
+
+            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+
+            services.AddEntityFrameworkSqlite().AddDbContext<DatabaseContext>(options => options.UseSqlite(connectionString), ServiceLifetime.Transient);
+            services.AddLogging();
+            //services.AddSingleton(new LoggerFactory().AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger.txt")));
+
+            services.AddTrafficService(Configuration);
+
+            services.AddTransient<ITrafficDataService, TrafficDataService>();
+            services.AddTransient<ITrafficDataServiceProvider, TrafficDataServiceProvider>();
+            services.AddTransient<IService, ServiceAgent>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,7 +58,7 @@ namespace UklonTestApp
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{regionCode?}");
             });
         }
     }
