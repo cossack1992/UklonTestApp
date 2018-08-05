@@ -30,18 +30,14 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
             {
                 xmlDoc.Load(url);
 
-                var traffic = xmlDoc.SelectSingleNode("//traffic");
-                if (traffic == null)
-                {
-                    throw new ReadingHTMLDocumentException("Document does not contain node 'traffic'");
-                }
-
-                var level = xmlDoc.SelectSingleNode("//level")?.InnerText;
-                var icon = xmlDoc.SelectSingleNode("//icon")?.InnerText;
-                var text = xmlDoc.SelectSingleNode("//hint[@lang='en']")?.InnerText;
+                var title = xmlDoc.SelectSingleNode("//title")?.InnerText ?? "There is no available information!";
+                var level = xmlDoc.SelectSingleNode("//level")?.InnerText ?? "There is no available information!";
+                var icon = xmlDoc.SelectSingleNode("//icon")?.InnerText ?? "There is no available information!";
+                var text = xmlDoc.SelectSingleNode("//hint[@lang='en']")?.InnerText ?? "There is no available information!";
 
                 var regionTrafficStatus = new RegionTrafficStatus(
                     regionCode,
+                    title,
                     dateTimeNow,
                     level,
                     icon,

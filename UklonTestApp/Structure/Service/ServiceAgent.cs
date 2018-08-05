@@ -8,6 +8,7 @@ using UklonTestApp.Models;
 using UklonTestApp.Structure.DataService;
 using UklonTestApp.Structure.TrafficStructure.Services;
 using UklonTestApp.Exceptions;
+using System.Threading;
 
 namespace UklonTestApp.Structure.Service
 {
@@ -42,16 +43,7 @@ namespace UklonTestApp.Structure.Service
                     model => 
                     new Region(
                         model.RegionCode,
-                        model.RegionName,
-                        model.RegionTrafficStatuses
-                            .Select(
-                                status => 
-                                    new RegionTrafficStatus(
-                                        status.Region.RegionCode,
-                                        status.DateTimeNow,
-                                        status.TrafficLevel,
-                                        status.TrafficIcon,
-                                        status.TrafficMessage))));
+                        model.RegionName));
             }
             catch (Exception exception)
             {
@@ -81,7 +73,13 @@ namespace UklonTestApp.Structure.Service
                     }
                 }
 
-                return new RegionTrafficStatus(result.Region.RegionCode, result.DateTimeNow, result.TrafficLevel, result.TrafficIcon, result.TrafficMessage);
+                return result == null ? null : new RegionTrafficStatus(
+                    result.Region.RegionCode,
+                    result.Region.RegionName,
+                    result.DateTimeNow,
+                    result.TrafficLevel,
+                    result.TrafficIcon, 
+                    result.TrafficMessage);
                 
             }
             catch (Exception exception)

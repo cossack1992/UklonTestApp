@@ -28,11 +28,21 @@ namespace UklonTestApp.Structure.DataService
             using (var context = new DatabaseContext())
             {
                 var regionToUpdate = context.Regions.FirstOrDefault(region => region.RegionCode == result.RegionCode);
+
                 var regionTrafficStatusModel = new RegionTrafficStatusModel();
+
+                if (regionToUpdate == null)
+                {
+                    regionToUpdate = new RegionModel();
+                    regionToUpdate.Id = Guid.NewGuid();
+                    regionToUpdate.RegionCode = result.RegionCode;
+                    regionToUpdate.RegionName = result.Title;
+                    regionToUpdate.RegionTrafficStatuses = new List<RegionTrafficStatusModel> { regionTrafficStatusModel };
+                }
 
                 regionTrafficStatusModel.Id = Guid.NewGuid();
                 regionTrafficStatusModel.DateTimeNow = result.Time;
-                regionTrafficStatusModel.Region = regionToUpdate ?? throw new DataBaseException($"Could not find region [RegionCode = {result.RegionCode}]");
+                regionTrafficStatusModel.Region = regionToUpdate;
                 regionTrafficStatusModel.RegionId = regionToUpdate.Id;
                 regionTrafficStatusModel.TrafficIcon = result.Icon;
                 regionTrafficStatusModel.TrafficLevel = result.Level;
@@ -56,15 +66,18 @@ namespace UklonTestApp.Structure.DataService
             using (var context = new DatabaseContext())
             {
                 var regionModels = new List<RegionModel>();
-                foreach(var region in regions)
+                foreach (var region in regions)
                 {
                     if (region == null)
                     {
                         throw new ArgumentNullException(nameof(regions));
                     }
 
-                    var savedRegion = context.Regions.FirstOrDefault(dbRegion => dbRegion.RegionCode == region.RegionCode);
-                    if(savedRegion == null)
+                    var savedRegion = context.Regions
+                        .Include(regionModel => regionModel.RegionTrafficStatuses)
+                        .FirstOrDefault(dbRegion => dbRegion.RegionCode == region.RegionCode);
+
+                    if (savedRegion == null)
                     {
                         savedRegion = new RegionModel();
                         savedRegion.Id = Guid.NewGuid();
@@ -73,11 +86,11 @@ namespace UklonTestApp.Structure.DataService
                         savedRegion.RegionTrafficStatuses = new List<RegionTrafficStatusModel>();
                         context.Regions.AddRange(savedRegion);
                     }
-
-                    regionModels.Add(savedRegion);
-                }              
+                }
 
                 await context.SaveChangesAsync();
+
+                regionModels = context.Regions.Select(region => region).ToList();
 
                 return regionModels;
             }

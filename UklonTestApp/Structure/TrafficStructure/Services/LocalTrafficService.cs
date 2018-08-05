@@ -27,6 +27,7 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
             var messageText = Messages.Where(icon => icon.iconId == random.Next(1, 3)).Single().text;
             var regionTrafficStatus = new RegionTrafficStatus(
                 regionCode,
+                "Some title",
                 dateTimeNow,
                 random.Next(1, 5).ToString(),
                 iconText,

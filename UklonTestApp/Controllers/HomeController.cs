@@ -50,8 +50,8 @@ namespace UklonTestApp.Controllers
         /// <returns>Json traffic status for <see cref="RegionModel"/>.</returns>
         public async Task<JsonResult> GetRegion(string regionCode)
         {
-            var results = await Service.GetRegionTrafficStatusAsync(regionCode, DateTimeOffset.Now);
-            return Json(JsonConvert.SerializeObject(results));
+            var result = await Service.GetRegionTrafficStatusAsync(regionCode, DateTimeOffset.Now);
+            return Json(result is RegionTrafficStatus ? JsonConvert.SerializeObject(result) : "SORRY, Service is not available!");
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace UklonTestApp.Controllers
             var regions = await Service.GetRegions();
 
             var statuses = await Service.GetRegionTrafficStatuses(regions.Select(region => region.RegionCode), DateTimeOffset.Now);
-            return Json(JsonConvert.SerializeObject(statuses));
+            return Json(JsonConvert.SerializeObject(statuses.Where(status => status is RegionTrafficStatus)));
         }
 
         /// <summary>

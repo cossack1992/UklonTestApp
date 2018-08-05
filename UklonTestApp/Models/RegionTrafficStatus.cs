@@ -9,32 +9,14 @@ namespace UklonTestApp.Models
     {
         public RegionTrafficStatus(
             string regionCode,
+            string title,
             DateTimeOffset time,
             string level,
             string icon,
             string text)
         {
-            if (string.IsNullOrWhiteSpace(regionCode))
-            {
-                throw new ArgumentException(nameof(regionCode));
-            }
-
-            if (string.IsNullOrWhiteSpace(level))
-            {
-                throw new ArgumentException(nameof(level));
-            }
-
-            if (string.IsNullOrWhiteSpace(icon))
-            {
-                throw new ArgumentException(nameof(icon));
-            }
-
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                throw new ArgumentException(nameof(text));
-            }
-
             RegionCode = regionCode;
+            Title = title;
             Time = time;
             Level = level;
             Icon = icon;
@@ -42,6 +24,7 @@ namespace UklonTestApp.Models
         }
 
         public string RegionCode { get; }
+        public string Title { get; }
         public DateTimeOffset Time { get; }
         public string Level { get; }
         public string Icon { get; }
