@@ -6,6 +6,7 @@ using UklonTestApp.Models;
 using UklonTestApp.Structure.DataService;
 using UklonTestApp.Structure.TrafficStructure.Services;
 using UklonTestApp.Exceptions;
+using UklonTestApp.Structure.TrafficStructure.Interfaces;
 
 namespace UklonTestApp.Structure.Service
 {
@@ -14,13 +15,13 @@ namespace UklonTestApp.Structure.Service
     /// </summary>
     public class ServiceAgent : IService
     {
-        public ServiceAgent(ITrafficProvider trafficStatusProvider, ITrafficDataService trafficDataService)
+        public ServiceAgent(ITrafficSevice trafficService, ITrafficDataService trafficDataService)
         {
-            TrafficProvider = trafficStatusProvider ?? throw new ArgumentNullException(nameof(trafficStatusProvider));
+            TrafficService = trafficService ?? throw new ArgumentNullException(nameof(trafficService));
             TrafficDataService = trafficDataService ?? throw new ArgumentNullException(nameof(trafficDataService));
         }
 
-        public ITrafficProvider TrafficProvider { get; }
+        public ITrafficSevice TrafficService { get; }
         public ITrafficDataService TrafficDataService { get; }
 
         /// <summary>
@@ -31,7 +32,7 @@ namespace UklonTestApp.Structure.Service
         {
             try
             {
-                var regions = await this.TrafficProvider.GetRegionsAsync();            
+                var regions = await this.TrafficService.GetRegionsAsync();            
 
                 var regionModels = await this.TrafficDataService.AddRegionsAsync(regions);
 
@@ -67,7 +68,7 @@ namespace UklonTestApp.Structure.Service
 
                 if (result == null)
                 {
-                    var webResult = await this.TrafficProvider.GetRegionTrafficStatusAsync(regionCode, dateTimeNow);
+                    var webResult = await this.TrafficService.GetRegionTrafficStatusAsync(regionCode, dateTimeNow);
 
                     if(webResult != null)
                     {
@@ -106,12 +107,17 @@ namespace UklonTestApp.Structure.Service
             var tasks = new List<Task<RegionTrafficStatus>>();
             foreach (var regionCode in regionCodes)
             {
-                var task = Task.Run(async () => await this.GetRegionTrafficStatusAsync(regionCode, dateTimeNow));
-
-                tasks.Add(task);
+                tasks.Add(this.GetRegionTrafficStatusAsync(regionCode, dateTimeNow));
             }
 
-            return await Task.WhenAll(tasks);
+            try
+            {
+                return await Task.WhenAll(tasks);
+            }
+            catch(Exception exception)
+            {
+                throw new ServiceException("There were an exception during work of service of retriving region traffic statuses", exception);
+            }
         }
     }
 }

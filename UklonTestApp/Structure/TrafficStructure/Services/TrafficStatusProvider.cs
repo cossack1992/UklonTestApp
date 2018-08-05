@@ -20,7 +20,7 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
 
         public Task<IEnumerable<Region>> GetRegionsAsync()
         {
-            return Task.Run(() => this.TrafficService.GetRegions());
+            return Task.Run(() => this.TrafficService.GetRegionsAsync());
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
                 throw new ArgumentException("Argument is not valid!", nameof(regionCode));
             }
 
-            return Task.Run(() => TrafficService.GetRegionTrafficStatus(regionCode, dateTimeNow));
+            return Task.Run(() => TrafficService.GetRegionTrafficStatusAsync(regionCode, dateTimeNow));
         }
     }
 }

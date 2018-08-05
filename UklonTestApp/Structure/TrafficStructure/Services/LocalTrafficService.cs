@@ -16,42 +16,47 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
         /// </summary>
         /// <param name="regionCode"></param>
         /// <returns></returns>
-        public RegionTrafficStatus GetRegionTrafficStatus(string regionCode, DateTimeOffset dateTimeNow)
+        public Task<RegionTrafficStatus> GetRegionTrafficStatusAsync(string regionCode, DateTimeOffset dateTimeNow)
         {
             if (string.IsNullOrWhiteSpace(regionCode))
             {
                 throw new ArgumentException("Argument is not valid!", nameof(regionCode));
             }
 
-            var random = new Random();
+            return Task.Run(() =>
+            {
+                var random = new Random();
 
-            string title = "SomeTitle_" + regionCode;
-            var randomLevel = random.Next(1, 5).ToString();
-            var randomIconId = random.Next(1, 3);
-            var randomMessageId = random.Next(1, 3);
+                string title = "SomeTitle_" + regionCode;
+                var randomLevel = random.Next(1, 5).ToString();
+                var randomIconId = random.Next(1, 3);
+                var randomMessageId = random.Next(1, 3);
 
-            var iconText = Icons.Where(icon => icon.Key == randomIconId).Single().Value;
-            var messageText = Messages.Where(icon => icon.Key == randomMessageId).Single().Value;
+                var iconText = Icons.Where(icon => icon.Key == randomIconId).Single().Value;
+                var messageText = Messages.Where(icon => icon.Key == randomMessageId).Single().Value;
 
 
-            var regionTrafficStatus = new RegionTrafficStatus(
-                regionCode,
-                title,
-                dateTimeNow,
-                randomLevel,
-                iconText,
-                messageText);
+                var regionTrafficStatus = new RegionTrafficStatus(
+                    regionCode,
+                    title,
+                    dateTimeNow,
+                    randomLevel,
+                    iconText,
+                    messageText);
 
-            return regionTrafficStatus;
+                return regionTrafficStatus;
+            });
         }
 
-        public IEnumerable<Region> GetRegions()
+        public Task<IEnumerable<Region>> GetRegionsAsync()
         {
             string url = @"https://goo.gl/EKCY6i";
-            var htmlWeb = new HtmlWeb();
-            var document = htmlWeb.Load(url);
-
-            return HelperMethods.GetRegionsFromHTMLDocument(document);
+            return Task.Run(() =>
+            {
+                var htmlWeb = new HtmlWeb();
+                var document = htmlWeb.Load(url);
+                return HelperMethods.GetRegionsFromHTMLDocument(document);
+            });
         }
 
         private IDictionary<int, string> Icons = new Dictionary<int, string>

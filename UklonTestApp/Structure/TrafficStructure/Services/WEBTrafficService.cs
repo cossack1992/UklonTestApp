@@ -1,6 +1,8 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Xml;
 using UklonTestApp.Exceptions;
 using UklonTestApp.Helpers;
@@ -14,22 +16,29 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
     /// </summary>
     public class WEBTrafficService : ITrafficSevice
     {
-        public IEnumerable<Region> GetRegions()
+        public WEBTrafficService()
+        {
+            Client = new HttpClient();
+        }
+
+        public HttpClient Client { get; }
+
+        public Task<IEnumerable<Region>> GetRegionsAsync()
         {
             try
             {
                 string url = @"https://goo.gl/EKCY6i";
-                var htmlWeb = new HtmlWeb();
-                var document = htmlWeb.Load(url);
 
-                return HelperMethods.GetRegionsFromHTMLDocument(document);
+                return Task.Run(() =>
+                {
+                    var htmlWeb = new HtmlWeb();
+                    var document = htmlWeb.Load(url);
+                    return HelperMethods.GetRegionsFromHTMLDocument(document);
+                });
             }
             catch (Exception exception)
             {
-                if (exception.Message != "Root element is missing.")
-                    throw new TrafficException("Could not read results of request to yandex", exception);
-
-                return null;
+                throw new TrafficException("Could not read results of request to 'https://goo.gl/EKCY6i'", exception);
             }
         }
 
@@ -39,7 +48,7 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
         /// <param name="regionCode"></param>
         /// <param name="dateTimeNow"></param>
         /// <returns></returns>
-        public RegionTrafficStatus GetRegionTrafficStatus(string regionCode, DateTimeOffset dateTimeNow)
+        public async Task<RegionTrafficStatus> GetRegionTrafficStatusAsync(string regionCode, DateTimeOffset dateTimeNow)
         {
             if (string.IsNullOrWhiteSpace(regionCode))
             {
@@ -50,7 +59,13 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
             var xmlDoc = new XmlDocument();
             try
             {
-                xmlDoc.Load(url);
+                var response = await Client.GetAsync(url);
+
+                response.EnsureSuccessStatusCode();
+
+                var stream = await response.Content.ReadAsStreamAsync();
+
+                xmlDoc.Load(stream);
 
                 var title = xmlDoc.SelectSingleNode("//title")?.InnerText ?? "There is no available information!";
                 var level = xmlDoc.SelectSingleNode("//level")?.InnerText ?? "There is no available information!";
@@ -66,13 +81,15 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
                     text);
 
                 return regionTrafficStatus;
+
+            }
+            catch (Exception exception) when (exception.Message == "Root element is missing.")
+            {
+                return null;
             }
             catch (Exception exception)
             {
-                if (exception.Message != "Root element is missing.")
-                    throw new TrafficException("Could not read results of request to yandex", exception);
-
-                return null;
+                throw new TrafficException("Could not read results of request to yandex", exception);
             }
         }
     }

@@ -13,12 +13,12 @@ namespace UklonTestApp.Structure.TrafficStructure.Interfaces
         /// </summary>
         /// <param name="regionCode"></param>
         /// <returns></returns>
-        RegionTrafficStatus GetRegionTrafficStatus(string regionCode, DateTimeOffset dateTimeNow);
+        Task<RegionTrafficStatus> GetRegionTrafficStatusAsync(string regionCode, DateTimeOffset dateTimeNow);
 
         /// <summary>
         /// Get all available <see cref="Region"/>
         /// </summary>
         /// <returns></returns>
-        IEnumerable<Region> GetRegions();
+        Task<IEnumerable<Region>> GetRegionsAsync();
     }
 }
