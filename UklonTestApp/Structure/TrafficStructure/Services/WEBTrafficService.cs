@@ -29,21 +29,24 @@ namespace UklonTestApp.Structure.TrafficStructure.Services
         /// <returns></returns>
         public Task<IEnumerable<Region>> GetRegionsAsync()
         {
-            try
-            {
-                string url = @"https://goo.gl/EKCY6i";
-
-                return Task.Run(() =>
+            string url = @"https://goo.gl/EKCY6i";
+            var tcs = new TaskCompletionSource<IEnumerable<Region>>();
+           
+            Task.Run(() => {
+                try
                 {
                     var htmlWeb = new HtmlWeb();
                     var document = htmlWeb.Load(url);
-                    return HelperMethods.GetRegionsFromHTMLDocument(document);
-                });
-            }
-            catch (Exception exception)
-            {
-                throw new TrafficServiceException("Could not read results of request to 'https://goo.gl/EKCY6i'", exception);
-            }
+                    var regions = HelperMethods.GetRegionsFromHTMLDocument(document);
+                    tcs.SetResult(regions);
+                }
+                catch (Exception exception)
+                {
+                    tcs.SetException(new TrafficServiceException("Could not read results of request to 'https://goo.gl/EKCY6i'", exception));
+                }
+            });        
+            
+            return tcs.Task;
         }
 
         /// <summary>
